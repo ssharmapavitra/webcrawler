@@ -8,28 +8,29 @@ try {
 	var url = readline.question("Enter the URL: ");
 
 	// Variables
-	var urls = [];
+	var url_list = [];
 	var id = 0;
-	var curr_count = 1,
-		idx = -1,
-		curr_crawl = 1,
+	var current_crawl_count = 1,
+		current_index = -1,
+		current_crawl_number = 1,
 		temp = 0;
+	var path = `./crawledFiles/${current_crawl_number}`;
 
-	urls.push(url);
+	url_list.push(url);
 	main();
 
 	async function main() {
-		while (idx < urls.length && curr_crawl < 5) {
+		while (current_index < url_list.length && current_crawl_number < 5) {
 			id++;
-			idx++;
-			url = urls[idx];
+			current_index++;
+			url = url_list[current_index];
 			// Choosing http or https
 			let httpClient = url.startsWith("https") ? https : http;
 			console.log("This is " + url);
 
 			try {
+				// Saving the WebPage of the entered URL
 				await new Promise((resolve, reject) => {
-					// Saving the WebPage of the entered URL
 					httpClient
 						.get(url, (res) => {
 							let html = "";
@@ -38,7 +39,9 @@ try {
 							});
 
 							res.on("end", () => {
-								fs.writeFile(`./crawledFiles/${id}.html`, html, (err) => {
+								//Create a new directory
+								fs.stat;
+								fs.writeFile(`${path}/${id}.html`, html, (err) => {
 									if (err) {
 										console.error("Error saving file: ", err);
 										reject(err);
@@ -57,7 +60,7 @@ try {
 
 				await new Promise((resolve, reject) => {
 					// Finding URLs from the given file
-					fs.readFile(`./crawledFiles/${id}.html`, "utf8", (err, data) => {
+					fs.readFile(`${path}/${id}.html`, "utf8", (err, data) => {
 						if (err) {
 							console.error("Error: ", err);
 							reject(err);
@@ -74,13 +77,17 @@ try {
 						if (list != null) {
 							console.log(list.length + " new links added");
 							temp += list.length;
-							urls = urls.concat(list);
+							url_list = url_list.concat(list);
 						}
 
-						if (id === curr_count) {
-							curr_crawl++;
+						if (id === current_crawl_count) {
+							current_crawl_number++;
+							fs.mkdirSync(
+								`./crawledFiles/${current_crawl_number}+${current_crawl_count}`
+							);
+							path = `./crawledFiles/${current_crawl_number}+${current_crawl_count}`;
 							id = 0;
-							curr_count = temp;
+							current_crawl_count = temp;
 							temp = 0;
 						}
 						resolve();
