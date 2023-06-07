@@ -19,7 +19,7 @@ try {
 	main();
 
 	async function main() {
-		while (idx < urls.length && curr_crawl < 3) {
+		while (idx < urls.length && curr_crawl < 5) {
 			id++;
 			idx++;
 			url = urls[idx];
@@ -72,16 +72,14 @@ try {
 
 						// Update variables
 						if (list != null) {
+							console.log(list.length + " new links added");
 							temp += list.length;
 							urls = urls.concat(list);
-							console.log(
-								"This is idx " + idx + "  " + urls.length + "  " + list.length
-							);
 						}
 
 						if (id === curr_count) {
 							curr_crawl++;
-							id = 1;
+							id = 0;
 							curr_count = temp;
 							temp = 0;
 						}
