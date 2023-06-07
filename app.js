@@ -6,79 +6,93 @@ const readline = require("readline-sync");
 
 //For accepting response from command line
 var url = readline.question("Enter the URL :- ");
-console.log("Your URL is " + url + "And type is " + typeof url);
+// console.log("Your URL is " + url + "And type is " + typeof url);
 
 //Variables
 var urls = [];
 var id = 1;
-var crawl_count = 1,
+var curr_count = 1,
 	idx = 0,
 	curr_crawl = 1,
 	temp = 0;
 
 urls.push(url);
+main();
 
-while (idx < urls.length || crawl_count < 5) {
-	url = urls[idx];
-	//Choosing http or https
-	const httpClient = url.startsWith("https") ? https : http;
-	console.log("This is  " + url);
+async function main() {
+	while (idx < urls.length && curr_crawl < 5) {
+		url = urls[idx];
+		//Choosing http or https
+		let httpClient = url.startsWith("https") ? https : http;
+		console.log("This is  " + url);
 
-	//Saving the WebPage of entered URL
-	httpClient
-		.get(url, (res) => {
-			console.log("This is 1 ");
+		await new Promise((resolve, reject) => {
+			// Saving the WebPage of entered URL
+			httpClient
+				.get(url, (res) => {
+					let html = "";
+					res.on("data", (d) => {
+						html += d;
+					});
 
-			let html = "";
-			res.on("data", (d) => {
-				html += d;
-			});
-
-			res.on("end", () => {
-				fs.writeFileSync(`./crawledFiles/${id}.html`, html, (err) => {
-					console.log("This is 2 ");
-
-					if (err) {
-						console.error("Error saving file: ", err);
-					} else {
-						console.log("Page saved successfully");
-					}
+					res.on("end", () => {
+						fs.writeFile(`./crawledFiles/${id}.html`, html, (err) => {
+							if (err) {
+								console.error("Error saving file: ", err);
+								reject(err);
+							} else {
+								console.log("Page saved successfully");
+								resolve();
+							}
+						});
+					});
+				})
+				.on("error", (e) => {
+					console.error("Error: ", e);
+					reject(e);
 				});
-			});
-		})
-		.on("error", (e) => {
-			console.error("Error --- ", e);
 		});
 
-	//Finding URLs from the given file
-	console.log("This is 2 ");
-	fs.readFileSync(`./crawledFiles/${id}.html`, "utf8", (err, data) => {
-		if (err) {
-			console.log("Error : ", err);
-			return;
-		}
+		//Finding URLs from the given file
+		await new Promise((resolve, reject) => {
+			// Finding URLs from the given file
+			fs.readFile(`./crawledFiles/${id}.html`, "utf8", (err, data) => {
+				if (err) {
+					console.error("Error: ", err);
+					reject(err);
+					return;
+				}
 
-		//Pattern to match URLs
-		const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/gi;
+				// Pattern to match URLs
+				const urlPattern = /https?:\/\/[^\s/$.?#].[^\s]*/gi;
 
-		//find url
-		let list = data.match(urlPattern);
+				// Find URLs
+				let list = data.match(urlPattern);
 
-		//Print
-		console.log("URL found in file: ", list);
+				// Print URLs
+				// console.log("URLs found in file: ", list);
 
-		//Updating variables
-		id++;
-		idx++;
-		temp += list.length;
-		if (id == curr_count) {
-			curr_crawl++;
-			id = 1;
-			curr_crawl = temp;
-			temp = 0;
-		}
-	});
-	console.log("This is 4 ");
+				// Update variables
+				id++;
+				idx++;
+				if (list != null) {
+					temp += list.length;
+					urls = urls.concat(list);
+					console.log(
+						"This is idx " + idx + "  " + urls.length + "  " + list.length
+					);
+				}
+
+				if (id === curr_crawl) {
+					curr_crawl++;
+					id = 1;
+					curr_crawl = temp;
+					temp = 0;
+				}
+				resolve();
+			});
+		});
+	}
 }
 
 // *

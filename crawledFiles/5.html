@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+  integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<!-- google fonts -->
+<link href="https://fonts.googleapis.com/css?family=Changa|Changa+One|Hind|Montserrat&display=swap"
+rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+<!--icon cdn -->
+<link
+	rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+<!-- new-header css -->
+<link rel="stylesheet" href="/common/css/bootstrap-selectpicker.css">
+<link rel="stylesheet" href="/header/css/header.css">
+<link rel="stylesheet" href="/header/css/header-new.css" />
+<script>
+    const discussionUrl = `https://discussions.codequotient.com`;
+    const WORKSPACES_API_HOST = `https://ws-backend.codequotient.com`;
+		const WORKSPACES_APP_HOST = `https://workspaces.codequotient.com`
+</script>
+<script src="/header/js/header.js"></script>
+
+<!-- include roleResourceConroller -->
+<script>
+    let rolesResource = JSON.parse('{}');
+
+    let resourceActionsMap = new Map();
+    if(rolesResource && rolesResource.roles && rolesResource.roles.length) {
+        rolesResource.roles.map((obj)=> {
+          if(obj.resource) resourceActionsMap.set(obj.resource, obj.actions);
+        })
+    }
+
+    function checkResourcePermission(resource, action) {
+        if(resourceActionsMap.has(resource) && resourceActionsMap.get(resource).length) {
+            // if we want to check only resource
+            if(action == undefined){
+                return true;
+            }
+            // if we want to check only resource
+
+           let actions = resourceActionsMap.get(resource) || [];
+           
+           if(actions.includes(action)) return true;
+           return false;
+        }
+        return false;
+    }
+
+    
+</script>
+		<style>
+			@font-face {
+				font-family: 'Avenir';
+				src: url('/websiteNew/assets/fonts/Avenir/Avenir-Medium.ttf')
+					format('truetype');
+				font-weight: 500;
+				font-style: normal;
+			}
+			@font-face {
+				font-family: 'Avenir Book';
+				src: url('/websiteNew/assets/fonts/Avenir/Avenir-Book.ttf')
+					format('truetype');
+				font-weight: 500;
+				font-style: normal;
+			}
+
+			@font-face {
+				font-family: 'Avenir Book';
+				src: url('/websiteNew/assets/fonts/Avenir/Avenir-BookOblique.ttf')
+					format('truetype');
+				font-weight: 400;
+				font-style: italic;
+			}
+
+			@font-face {
+				font-family: 'Avenir';
+				src: url('/websiteNew/assets/fonts/Avenir/Avenir-Roman.ttf')
+					format('truetype');
+				font-weight: 400;
+				font-style: normal;
+			}
+			html,
+			body {
+				font-family: 'Avenir';
+				color: #333333;
+				min-height: 100%;
+				/* height: 100%; */
+				scroll-behavior: smooth;
+				/* overflow-x: hidden; */
+			}
+
+			.navbar-toggler {
+				outline: none !important;
+			}
+
+			.nav-link.nav__link.active:after {
+				height: 2px;
+				display: block;
+				margin: auto;
+				width: 80%;
+				background: #de6834;
+				content: '';
+				position: relative;
+				top: 4px;
+			}
+			.nav-link.nav__link.active2:after {
+				height: 2px;
+				display: block;
+				width: 40%;
+				background: #de6834;
+				content: '';
+				position: relative;
+				top: 4px;
+			}
+
+			.wrapper__main {
+				padding-top: 80px;
+				overflow-x: hidden;
+			}
+
+			.vertical__divider {
+				height: 100%;
+				border-right: 1px solid #d6d6d6;
+			}
+
+			.horizontal__divider {
+				height: 2px;
+				border-bottom: 1px solid #d6d6d6;
+			}
+
+			.bg__primary {
+				background-color: #de6834;
+				border-color: #de6834;
+				color: white;
+			}
+
+			.logo__text__part__one {
+				font-family: 'Changa', sans-serif;
+				font-weight: 500;
+				font-size: 27px; /*xx-large*/
+				letter-spacing: -1.9px;
+			}
+
+			.logo__text__part__two {
+				position: relative;
+				left: -4px;
+				font-family: 'Changa One', cursive;
+				font-size: 27px; /*xx-large*/
+			}
+
+			header {
+				background-color: #ffffff;
+				position: fixed;
+				top: 0;
+				z-index: 1000;
+				width: 100%;
+				transition: all 0.5s ease;
+				box-shadow: none;
+				left: 0;
+			}
+
+			.header-section nav {
+				padding: 15px 40px !important;
+			}
+
+			header .logo__link {
+				color: #de6834;
+				text-decoration: none;
+			}
+
+			header .logo__link:hover {
+				color: #c75829;
+			}
+
+			.navbar-nav .active {
+				color: #de6834;
+			}
+
+			nav .nav__link {
+				color: #333333;
+				/* font-weight: 600; I dont think so its work */
+				font-size: 16.5px;
+			}
+
+			#navigation li span {
+				font-weight: 500;
+				opacity: 0.9;
+			}
+			.dropdown-menu {
+				border: none;
+				box-shadow: 0px 0px 10px #00000029;
+			}
+			.dropdown-divider {
+				margin: 1.2rem 0 !important;
+			}
+
+			nav .navbar__dropdown::after {
+				display: none;
+			}
+
+			nav .navbar__dropdown__icon {
+				font-size: small;
+				color: #707070;
+			}
+
+			nav .login__link {
+				color: #707070;
+				text-decoration: none;
+			}
+
+			.dropdown__item .dropdown__item__header {
+				color: #de6834;
+				font-weight: 700;
+				font-size: medium;
+				/* text-transform: uppercase; */
+				font-family: 'Montserrat', sans-serif;
+				font-weight: 400;
+			}
+			.header__btn__text {
+				color: #fff;
+				font-size: 17px;
+				font-weight: 600;
+			}
+			.navbar-toggler {
+				outline: none !important;
+			}
+			.navbar-nav .active {
+				color: #de6834;
+			}
+			nav .navbar__dropdown::after {
+				display: none;
+			}
+
+			nav .navbar__dropdown__icon {
+				font-size: small;
+				color: #707070;
+			}
+			.main-page-container {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				margin-top: 250px;
+			}
+			.left-side-page-container {
+				padding-left: 15%;
+				position: relative;
+			}
+			.circle-logo {
+				position: absolute;
+				top: 0%;
+				left: 0;
+			}
+			.circle-logo .circle-logo-1 {
+				background-color: #88462a;
+				width: 120px;
+				height: 120px;
+				opacity: 0.4;
+				border-radius: 50%;
+				position: relative;
+				right: 15px;
+			}
+			.circle-logo .circle-logo-2 {
+				background-color: #de6834;
+				width: 75px;
+				height: 90px;
+				opacity: 0.4;
+				border-radius: 50%;
+				position: relative;
+				right: 50px;
+				top: -56px;
+			}
+			.circle-logo .circle-logo-3 {
+				background-color: #e6b9a1;
+				width: 161px;
+				height: 168px;
+				opacity: 0.4;
+				border-radius: 50%;
+				position: relative;
+				right: 68px;
+				top: -108px;
+			}
+			.text-one {
+				font-size: 43px;
+				font-weight: 500;
+				color: #de6834;
+				margin-bottom: 0px;
+			}
+			.text-two {
+				font-size: 22px;
+				font-family: 'Avenir Book';
+				font-weight: 400;
+			}
+
+			.text-three {
+				margin-top: 1.5rem;
+				font-family: 'Avenir Book';
+				font-size: 17px;
+				color: #de6834;
+			}
+			.text-three a {
+				color: #de6834;
+				text-decoration: none;
+			}
+
+			.right-side-page-container img {
+				width: 100%;
+				height: 100%;
+				max-width: 500px;
+				max-height: 500px;
+				display: block;
+				margin: auto;
+			}
+			@media (max-width: 768px) {
+				.text-one {
+					line-height: 55px;
+				}
+			}
+			@media (max-width: 575.98px) {
+				.text-one {
+					line-height: 50px;
+					font-size: 40px;
+				}
+				.text-two {
+					font-size: 17px;
+				}
+				.main-page-container {
+					grid-template-columns: 1fr;
+				}
+				.right-side-page-container {
+					margin-top: 10%;
+				}
+			}
+		</style>
+		<title>Page Not Found | CodeQuotient</title>
+	</head>
+	<body>
+		
+			<style>
+				nav > *, nav > span {
+					font-family: unset;
+				}
+				
+				header {
+					padding-top: 14px;
+					height: 81px;
+				}
+
+				/* modal addition on header */
+				.career-programs {
+              position: relative;
+            }
+            .career-programs-container {
+                width: 442px;
+                right: 9px;
+                top: 38px;
+                position: absolute;
+                border-radius: 5px;
+                background-color: #ffffff;
+                padding: 25px 30px;
+                box-shadow: 0px 0px 10px #00000029;
+            }
+            
+            .secp-text {
+              display: inline-block;
+              color: #DE6834 !important;
+              font-size: 20px;
+              font-weight: 600;
+              text-decoration: none !important;
+              line-height: 25px;
+            }
+            
+            .secp-sub-text1 {
+                font-size: 16px;
+                font-weight: 400;
+                margin: 6px 0;
+                line-height: 19px;
+            }
+            
+            .secp-sub-text2 {
+              margin-left: 12px;
+              font-family: "Avenir Book", sans-serif;
+              font-size: 15px;
+              font-weight: 500;
+            }
+            
+            @media (max-width: 480px) {
+              	.navbar-collapse,
+				.navbar-collapse.show {
+					transition: unset !important;
+					color: unset !important;
+					height: fit-content !important;
+                  	position: absolute !important;
+                  	top: 65px !important;
+                  	background: rgb(255, 255, 255) !important;
+                  	width: 90% !important;
+                  	left: 5% !important;
+                  	border-radius: 10px !important;
+                  	padding: 20px 20px !important;
+                  	box-shadow: 0px 0px 50px #00000029 !important;
+              	}
+
+				nav .nav__link {
+				    color: #de6834 !important;
+				    font-weight: 600;
+				    line-height: 23px;
+				    font-size: 20px !important;
+				}
+            }
+
+			.navbar-nav .nav-link {
+			    display: block !important;
+				padding-right: 0 !important;
+			    padding-left: 0 !important;
+			}
+            
+            .customDashed-border {
+              width: 100%;
+              height: 1px;
+              opacity: .5;
+              margin: 15px 0px;
+              background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='%23707070FF' stroke-width='3' stroke-dasharray='6%2c14' stroke-dashoffset='4' stroke-linecap='square'/%3e%3c/svg%3e");
+            }
+			</style>
+			<div class="container-fluid header-section">
+				<div id="header">
+					<header>
+    <nav class="navbar navbar-expand-lg">
+      <div>
+        <a class="navbar-brand logo__link" href="/">
+          <span class="logo__text__part__one">code</span>
+          <span class="logo__text__part__two">quotient</span>
+        </a>
+      </div>
+  
+      <div class="btn-tgl">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navigation"
+          aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+          <span>
+            <svg class="bi bi-list" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd"
+                d="M2.5 11.5A.5.5 0 013 11h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4A.5.5 0 013 7h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5zm0-4A.5.5 0 013 3h10a.5.5 0 010 1H3a.5.5 0 01-.5-.5z"
+                clip-rule="evenodd" />
+            </svg>
+          </span>
+        </button>
+      </div>
+  
+      <div class="collapse navbar-collapse" id="navigation">
+  
+        <!-- mobile view -->
+        <div class="d-lg-none mb-2">
+          <ul class="navbar-nav mr-auto">
+            
+            <li class="nav-item">
+              <a class="nav-link nav__link" href="/cq-sep" id="page3activeMobile">
+                <div style="background: #de6834; border-radius: 20px;width: fit-content;padding: 0px 16px 1px 16px;margin-bottom: 8px;">
+                  <span style="font-size: 12px;font-weight: 600; color: #fff;">AFTER XII</span>
+                </div>
+                Software Engineering <br>Program (CQ-SEP)
+              </a>
+              <p style="font-size: 16px; font-weight: 400;line-height: 19px;margin-bottom: 0px;">
+                Redefining the traditional degree by supercharging it with industry skills and real time work experience.
+              </p>
+            </li>
+            <div style="border-bottom: 1px dashed #707070; margin: 15px 0px;"></div>
+
+            <li class="nav-item">
+              <a class="nav-link nav__link" href="/supercoders-program" id="page1activeMobile">
+                <div style="background: #de6834; border-radius: 20px;width: fit-content;padding: 0px 16px 1px 16px;margin-bottom: 8px;">
+                  <span style="font-size: 12px;font-weight: 600; color: #fff;">FOR CS GRADUATES</span>
+                </div>
+                SuperCoders Program
+              </a>
+              <p style="font-size: 16px; font-weight: 400;line-height: 19px;margin-bottom: 0px;">
+                A path-breaking program designed to transform students into tech professionals.
+              </p>
+            </li>
+
+            <div style="border-bottom: 1px dashed #707070; margin: 15px 0px;"></div>
+            <li class="nav-item">
+              <a class="nav-link nav__link" href="/hire-developers" id="page4activeMobile">
+                  Hire Developers
+              </a>
+            </li>
+            <div style="border-bottom: 1px dashed #707070; margin: 15px 0px;"></div>
+            <li class="nav-item">
+              
+                <a class="nav__link" href="/login">
+                    Login
+                </a>
+              
+            </li>
+          </ul>
+        </div>
+  
+        <!-- desktop view -->
+        <div class="d-none d-lg-block ml-auto">
+          <ul class="navbar-nav">
+            
+            <li class="nav-item mr-3 career-programs">
+              <a class="nav-link nav__link" style="cursor: pointer;" onclick="$('.career-programs-container').toggleClass('d-none')">
+                <span>
+                  Career Programs
+                  <i class="fa fa-angle-down" style="font-size:21px; position: relative; top: 2px;"></i>
+                </span>
+              </a>
+              <div class="career-programs-container d-none">
+                <a class="secp-text" href="/cq-sep">
+                  <div style="background: #de6834; border-radius: 20px;width: fit-content;padding: 0px 16px;margin-bottom: 8px;">
+                    <span style="font-size: 12px;font-weight: 600; color: #fff;">AFTER XII</span>
+                  </div>
+                  Software Engineering Program (CQ-SEP)
+                </a>
+                <p class="secp-sub-text1">
+                  Redefining the traditional degree by supercharging <br> it with industry skills and real time work experience.
+                </p>
+                <!-- <div class="secp-sub-text2">
+                  <label style="margin-bottom: 4px;">• Core CS training for 1.5 years in college.</label>
+                  <label class="mb-0">• On-site training for 1.5 year in partner companies.</label>
+                </div> -->
+                <div style="border-bottom: 1px dashed #707070; margin: 15px 0px;"></div>
+                <a class="secp-text" href="/supercoders-program">
+                  <div style="background: #de6834; border-radius: 20px;width: fit-content;padding: 0px 16px;margin-bottom: 8px;">
+                    <span style="font-size: 12px;font-weight: 600; color: #fff;">FOR CS GRADUATES</span>
+                  </div>
+                  SuperCoders Program
+                </a>
+                <p class="secp-sub-text1 mb-0">
+                  A path-breaking program designed to transform <br> students into tech professionals.
+                </p>
+              </div>
+            </li>
+
+            <!-- <li class="nav-item mr-3">
+              <a class="nav-link nav__link" href="/academy" id="page3active">
+                <span>
+                  Academy
+                </span>
+              </a>
+            </li> -->
+
+            <!-- <li class="nav-item mr-3">
+              <a class="nav-link nav__link" href="/supercoders-program" id="page1active">
+                <span>
+                  SuperCoders Program
+                </span>
+              </a>
+            </li> -->
+  
+            <li class="nav-item mr-3">
+              <a class="nav-link nav__link" href="/hire-developers" id="page4active">
+                <span>
+                  Hire Developers
+                </span>
+              </a>
+            </li>
+            <!-- <li class="nav-item mr-3">
+              <a class="nav-link nav__link" href="/blog">
+                <span>
+                  Blog
+                </span>
+              </a>
+            </li> -->
+          </ul>
+        </div>
+  
+        <div class="d-none d-lg-inline mr-4 vertical__divider">&nbsp;</div>
+        
+        <div class="d-none d-lg-inline text-center mb-3 mb-lg-0">
+          <a class="login__link" href="/login">
+            <span>
+              Login
+            </span>
+          </a>
+        </div>
+        
+      </div>
+    </nav>
+  </header>
+				</div>
+			</div>
+		
+		<div class="main-page-container page-layout d-flex align-items-center" style="height: calc(100vh - 53px);">
+			<div class="row w-100">
+				<div class="col-md-7 d-flex  flex-column justify-content-center left-side-page-container">
+				<div class="circle-logo">
+					<div class="circle-logo-1"></div>
+					<div class="circle-logo-2"></div>
+					<div class="circle-logo-3"></div>
+				</div>
+				 
+				<p class="text-one">Uh oh!</p>
+				 
+				 
+				<p class="text-two">
+					Sorry, it seems we can’t find the page you’re looking for :(
+				</p>
+				 
+				 
+				<p class="text-three"><a href="/">Go back to home</a></p>
+				</div>
+				<div class="col-md-5 d-flex align-items-center justify-content-center right-side-page-container">
+					 
+					<img src="/icons/undraw_page_not_found_su7k.svg" alt="404" />
+					 
+				</div>
+			</div>
+		</div>
+
+		<!-- include scripts -->
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"
+  integrity="sha512-eVL5Lb9al9FzgR63gDs1MxcDS2wFu3loYAgjIH0+Hg38tCS8Ag62dwKyH+wzDb+QauDpEZjXbMn11blw8cbTJQ=="
+  crossorigin="anonymous"></script>
+
+
+<!-- new-header css -->
+<script src="/header/js/header-new.js"></script>
+		<script src="/websiteNew/js/main.js"></script>
+	</body>
+</html>
