@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "readline-sync": "^1.4.10"
   }
 }
