@@ -23,7 +23,7 @@ is reached or no more new links are found.
 1. Clone the repository:
 
    ```shell
-   git clone https://github.com/your-username/web-crawler.git
+   git clone https://github.com/ssharmapavitra/webcrawler.git
    ```
 
 2. Install dependencies:
