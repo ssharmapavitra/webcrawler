@@ -14,6 +14,8 @@ try {
 	let currentCrawlCount = 1;
 	let currentCrawlNumber = 1;
 	let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
+	const checkUrl = new Set();
+	checkUrl.add(url);
 
 	main();
 
@@ -91,7 +93,10 @@ try {
 			const href = $(element).attr("href");
 			if (href) {
 				const absoluteUrl = new URL(href, baseUrl).href;
-				urls.push(absoluteUrl);
+				if (!checkUrl.has(absoluteUrl)) {
+					urls.push(absoluteUrl);
+					checkUrl.add(absoluteUrl);
+				}
 			}
 		});
 
