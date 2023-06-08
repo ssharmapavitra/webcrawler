@@ -21,6 +21,7 @@ try {
 		while (id < urlList.length && currentCrawlNumber <= 5) {
 			const currentUrl = urlList[id];
 			id++;
+			let html = "";
 
 			// Choosing http or https
 			const httpClient = currentUrl.startsWith("https") ? https : http;
@@ -31,7 +32,6 @@ try {
 				await new Promise((resolve, reject) => {
 					httpClient
 						.get(currentUrl, (res) => {
-							let html = "";
 							res.on("data", (d) => {
 								html += d;
 							});
@@ -60,35 +60,24 @@ try {
 						});
 				});
 
-				await new Promise((resolve, reject) => {
-					// Finding URLs from the given file
-					fs.readFile(`${currentDirectory}/${id}.html`, "utf8", (err, data) => {
-						if (err) {
-							console.error("Error:", err);
-							reject(err);
-							return;
-						}
+				// Parse HTML using Cheerio
+				const baseUrl = currentUrl;
+				const urls = findUrlsInBody(html, baseUrl);
 
-						// Parse HTML using Cheerio
-						const baseUrl = currentUrl;
-						const urls = findUrlsInBody(data, baseUrl);
+				// Update variables
+				if (urls.length > 0) {
+					console.log(urls.length, "new links found");
+					urlList.push(...urls);
+				}
 
-						// Update variables
-						if (urls.length > 0) {
-							console.log(urls.length, "new links found");
-							urlList.push(...urls);
-						}
+				if (id === currentCrawlCount) {
+					currentCrawlNumber++;
+					currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
+					id = 0;
+					currentCrawlCount = urlList.length;
+				}
 
-						if (id === currentCrawlCount) {
-							currentCrawlNumber++;
-							currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
-							id = 0;
-							currentCrawlCount = urlList.length;
-						}
-
-						resolve();
-					});
-				});
+				resolve();
 			} catch (error) {
 				console.error("An error occurred:", error);
 			}
