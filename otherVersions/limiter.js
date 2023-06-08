@@ -4,30 +4,78 @@ const fs = require("fs");
 const cheerio = require("cheerio");
 const readline = require("readline-sync");
 
+// Variables
+let id = 0;
+let currentCrawlCount = 1;
+let currentCrawlNumber = 1;
+let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
+let urlList = [];
+let checkUrl = {};
+
 try {
 	// For accepting response from the command line
-	const url = readline.question("Enter the URL: ");
+	const choice = readline.question(
+		"Do you want to continue with the previous crawl? (y/n): "
+	);
 
-	// Variables
-	const urlList = [url];
-	let id = 0;
-	let currentCrawlCount = 1;
-	let currentCrawlNumber = 1;
-	let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
-	const checkUrl = new Set();
-	checkUrl.add(url);
+	if (choice === "y") {
+		// Read data from the file
+		fs.readFile("Output.txt", "utf8", (err, data) => {
+			if (err) {
+				console.error("Error:", err);
+				console.error("No Previous records found");
+				clearInterval(repeater);
+				return;
+			}
 
-	//Limiting the number of links to be crawled per minute
+			// Parse JSON string to JSON object
+			const jsonData = JSON.parse(data);
+
+			// Update variables
+			urlList = jsonData.urlList;
+			id = jsonData.id;
+			currentCrawlCount = jsonData.currentCrawlCount;
+			currentCrawlNumber = jsonData.currentCrawlNumber;
+			currentDirectory = jsonData.currentDirectory;
+			let checkUrl = jsonData.checkUrl;
+			main();
+		});
+	} else {
+		// Accepting URL from the command line
+		const url = readline.question("Enter the URL: ");
+		// Variables update
+		urlList = [url];
+		checkUrl[url] = 1;
+	}
+
+	//Limiting the number of links to be crawled per minute and storing the variables in a file
 	var limiter = 0;
 	const repeater = setInterval(() => {
 		limiter = 0;
+
+		//Store all the values of above variables in JSON format in a file
+		let data = JSON.stringify({
+			urlList,
+			id,
+			currentCrawlCount,
+			currentCrawlNumber,
+			currentDirectory,
+			checkUrl,
+		});
+
+		// Write data in 'Output.txt' .
+		fs.writeFile("Output.txt", data, (err) => {
+			// In case of a error throw err.
+			if (err) throw err;
+		});
+
 		main();
 	}, 6000);
 
 	main();
 
 	async function main() {
-		while (id < urlList.length && currentCrawlNumber <= 5 && limiter < 6) {
+		while (id < urlList.length && currentCrawlNumber <= 3 && limiter < 6) {
 			const currentUrl = urlList[id];
 			id++;
 
@@ -88,8 +136,8 @@ try {
 							console.log(list.length, "links found");
 
 							// Remove duplicates
-							list = list.filter((item) => !checkUrl.has(item));
-							list.forEach((item) => checkUrl.add(item));
+							list = list.filter((item) => !(item in checkUrl));
+							list.forEach((item) => checkUrl[item]);
 
 							urlList.push(...list);
 						}
