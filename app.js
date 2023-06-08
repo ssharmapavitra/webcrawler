@@ -76,8 +76,6 @@ try {
 					id = 0;
 					currentCrawlCount = urlList.length;
 				}
-
-				resolve();
 			} catch (error) {
 				console.error("An error occurred:", error);
 			}
