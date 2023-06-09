@@ -37,7 +37,7 @@ try {
 			currentCrawlCount = jsonData.currentCrawlCount;
 			currentCrawlNumber = jsonData.currentCrawlNumber;
 			currentDirectory = jsonData.currentDirectory;
-			let checkUrl = jsonData.checkUrl;
+			checkUrl = jsonData.checkUrl;
 			main();
 		});
 	} else {
