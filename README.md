@@ -1,4 +1,3 @@
-```markdown
 # Web Crawler
 
 A simple web crawler implemented in Node.js that fetches web pages, saves them locally, and extracts hyperlinks from the page body.
