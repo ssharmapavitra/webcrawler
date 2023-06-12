@@ -6,6 +6,7 @@ const readline = require("readline-sync");
 
 //Variables
 let id = 0;
+let index = 0;
 let currentCrawlCount = 1;
 let currentCrawlNumber = 1;
 let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
@@ -34,6 +35,7 @@ try {
 			// Update variables
 			urlList = jsonData.urlList;
 			id = jsonData.id;
+			index = jsonData.index;
 			currentCrawlCount = jsonData.currentCrawlCount;
 			currentCrawlNumber = jsonData.currentCrawlNumber;
 			currentDirectory = jsonData.currentDirectory;
@@ -57,6 +59,7 @@ try {
 		let data = JSON.stringify({
 			urlList,
 			id,
+			index,
 			currentCrawlCount,
 			currentCrawlNumber,
 			currentDirectory,
@@ -75,9 +78,10 @@ try {
 	main();
 
 	async function main() {
-		while (id < urlList.length && currentCrawlNumber <= 5 && limiter < 6) {
-			const currentUrl = urlList[id];
+		while (index < urlList.length && currentCrawlNumber <= 5 && limiter < 6) {
+			const currentUrl = urlList[index];
 			id++;
+			index++;
 			let html = "";
 
 			// Choosing http or https
