@@ -3,12 +3,14 @@ const https = require("https");
 const fs = require("fs");
 const cheerio = require("cheerio");
 const readline = require("readline-sync");
+const { url } = require("inspector");
 
 //Variables
 let id = 0;
 let index = 0;
 let currentCrawlCount = 1;
 let currentCrawlNumber = 1;
+let nextCrawlCount = 0;
 let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
 let urlList = [];
 let checkUrl = {};
@@ -38,6 +40,7 @@ try {
 			index = jsonData.index;
 			currentCrawlCount = jsonData.currentCrawlCount;
 			currentCrawlNumber = jsonData.currentCrawlNumber;
+			nextCrawlCount = jsonData.nextCrawlCount;
 			currentDirectory = jsonData.currentDirectory;
 			checkUrl = jsonData.checkUrl;
 			main();
@@ -62,6 +65,7 @@ try {
 			index,
 			currentCrawlCount,
 			currentCrawlNumber,
+			nextCrawlCount,
 			currentDirectory,
 			checkUrl,
 		});
@@ -128,6 +132,7 @@ try {
 				// Update variables
 				if (urls.length > 0) {
 					console.log(urls.length, "new links found");
+					nextCrawlCount += urls.length;
 					urlList.push(...urls);
 				}
 
@@ -135,7 +140,8 @@ try {
 					currentCrawlNumber++;
 					currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
 					id = 0;
-					currentCrawlCount = urlList.length;
+					currentCrawlCount = nextCrawlCount;
+					nextCrawlCount = 0;
 				}
 			} catch (error) {
 				console.error("An error occurred:", error);
