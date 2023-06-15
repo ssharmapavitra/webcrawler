@@ -3,7 +3,6 @@ const https = require("https");
 const fs = require("fs");
 const cheerio = require("cheerio");
 const readline = require("readline-sync");
-const { url } = require("inspector");
 
 //Variables
 let id = 0;
