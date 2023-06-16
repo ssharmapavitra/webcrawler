@@ -1,3 +1,7 @@
+#CrawledFile
+crawledSessions
+logData
+
 # Logs
 logs
 *.log

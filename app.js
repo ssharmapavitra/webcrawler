@@ -1,175 +1,153 @@
-const http = require("http");
-const https = require("https");
-const fs = require("fs");
-const cheerio = require("cheerio");
-const readline = require("readline-sync");
+const getHtml = require("./fetchDataFromUrl");
+const getUrls = require("./findUrlsInBody");
+const cmd = require("./getInputFromUser");
+const fhd = require("./fileHandler");
 
 //Variables
 let id = 0;
 let index = 0;
 let currentCrawlCount = 1;
-let currentCrawlNumber = 1;
+let currentCrawlNumber = 0;
+let crawlLimit = 3;
 let nextCrawlCount = 0;
-let currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
+let sessionId = 1101;
+let currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
 let urlList = [];
 let checkUrl = {};
 
 try {
-	// For accepting response from the command line
-	const choice = readline.question(
-		"Do you want to continue with the previous crawl? (y/n): "
-	);
+	// Accepting choice from the command line
+	const choice = cmd.getChoice();
 
-	if (choice === "y") {
-		// Read data from the file
-		fs.readFile("./storedVariables/Output.txt", "utf8", (err, data) => {
-			if (err) {
-				console.error("Error:", err);
-				console.error("No Previous records found");
-				clearInterval(repeater);
-				return;
-			}
+	if (choice == 2) {
+		// Accepting session id from the command line
+		sessionId = cmd.getSessionNumber();
 
-			// Parse JSON string to JSON object
-			const jsonData = JSON.parse(data);
+		// Getting data from backup file
+		const jsonData = fhd.getBackup(sessionId);
 
-			// Update variables
-			urlList = jsonData.urlList;
-			id = jsonData.id;
-			index = jsonData.index;
-			currentCrawlCount = jsonData.currentCrawlCount;
-			currentCrawlNumber = jsonData.currentCrawlNumber;
-			nextCrawlCount = jsonData.nextCrawlCount;
-			currentDirectory = jsonData.currentDirectory;
-			checkUrl = jsonData.checkUrl;
-			main();
-		});
+		// Updating variables
+		updateVariablesFromBackup(jsonData);
 	} else {
 		// Accepting URL from the command line
-		const url = readline.question("Enter the URL: ");
+		// const url = cmd.getBaseUrl();
+
+		// Accepting crawl limit from the command line
+		crawlLimit = cmd.getCrawlLimit();
+
+		// Accepting session id from the command line
+		sessionId = cmd.getSessionNumber();
+
+		// Setting directory
+		currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
+
+		const url = `http://127.0.0.1:8000/seed_session?sid=${sessionId}&depth=${crawlLimit}`;
 		// Variables update
 		urlList = [url];
 		checkUrl[url] = 1;
 	}
 
-	//Limiting the number of links to be crawled per minute and storing the variables in a file
-	var limiter = 0;
-	const repeater = setInterval(() => {
-		limiter = 0;
-
-		//Store all the values of above variables in JSON format in a file
-		let data = JSON.stringify({
-			urlList,
-			id,
-			index,
-			currentCrawlCount,
-			currentCrawlNumber,
-			nextCrawlCount,
-			currentDirectory,
-			checkUrl,
-		});
-
-		// Write data in 'Output.txt' .
-		fs.writeFile("./storedVariables/Output.txt", data, (err) => {
-			// In case of a error throw err.
-			if (err) throw err;
-		});
-
-		main();
-	}, 10000);
-
 	main();
 
 	async function main() {
-		while (index < urlList.length && currentCrawlNumber <= 5 && limiter < 6) {
+		while (index < urlList.length && currentCrawlNumber <= crawlLimit) {
 			const currentUrl = urlList[index];
 			id++;
 			index++;
-			let html = "";
-
-			// Choosing http or https
-			const httpClient = currentUrl.startsWith("https") ? https : http;
-			console.log("Crawling URL:", currentUrl);
-
 			try {
-				// Saving the WebPage of the entered URL
-				await new Promise((resolve, reject) => {
-					httpClient
-						.get(currentUrl, (res) => {
-							res.on("data", (d) => {
-								html += d;
-							});
+				//Setting directory and file path
+				fhd.setDirectory(currentDirectory);
 
-							res.on("end", () => {
-								// Create a new directory if it doesn't exist
-								if (!fs.existsSync(currentDirectory)) {
-									fs.mkdirSync(currentDirectory, { recursive: true });
-								}
+				//updating file path
+				const filePath = `${currentDirectory}/${id}.html`;
 
-								const filePath = `${currentDirectory}/${id}.html`;
-								fs.writeFile(filePath, html, (err) => {
-									if (err) {
-										console.error("Error saving file:", err);
-										reject(err);
-									} else {
-										console.log("Page saved successfully:", filePath);
-										resolve();
-									}
-								});
-							});
-						})
-						.on("error", (e) => {
-							console.error("Error:", e);
-							reject(e);
-						});
-				});
+				// Getting data from the given URL
+				await getHtml.getDataFromUrl(currentUrl, filePath);
 
-				// Parse HTML using Cheerio
-				const baseUrl = currentUrl;
-				const urls = findUrlsInBody(html, baseUrl);
+				// Finding URLs from the given file
+				let list = await getUrls.findUrlsInBody(filePath, currentUrl);
+				// console.log(list);
 
 				// Update variables
-				if (urls.length > 0) {
-					console.log(urls.length, "new links found");
-					nextCrawlCount += urls.length;
-					urlList.push(...urls);
-				}
+				updateUrlList(list);
 
-				if (id === currentCrawlCount) {
-					currentCrawlNumber++;
-					currentDirectory = `./crawledFiles/${currentCrawlNumber}`;
-					id = 0;
-					currentCrawlCount = nextCrawlCount;
-					nextCrawlCount = 0;
+				//next crawl
+				if (id === currentCrawlCount) nextCrawl();
+
+				// Backup
+				callBackup();
+
+				//End of the session
+				if (currentCrawlNumber > crawlLimit) {
+					console.log("Crawl Limit Reached");
+					endSession();
+					break;
 				}
 			} catch (error) {
 				console.error("An error occurred:", error);
 			}
-
-			limiter++;
-			if (currentCrawlNumber > 5) {
-				clearInterval(repeater);
-			}
 		}
 	}
 
-	// Function to find URLs in the body of HTML using Cheerio
-	function findUrlsInBody(html, baseUrl) {
-		const $ = cheerio.load(html);
-		const urls = [];
+	//Function to update variables
+	function updateVariablesFromBackup(jsonData) {
+		id = jsonData.id;
+		sessionId = jsonData.sessionId;
+		index = jsonData.index;
+		currentCrawlCount = jsonData.currentCrawlCount;
+		currentCrawlNumber = jsonData.currentCrawlNumber;
+		crawlLimit = jsonData.crawlLimit;
+		nextCrawlCount = jsonData.nextCrawlCount;
+		currentDirectory = jsonData.currentDirectory;
+		urlList = jsonData.urlList;
+		checkUrl = jsonData.checkUrl;
+	}
 
-		$("body a").each((index, element) => {
-			const href = $(element).attr("href");
-			if (href) {
-				const absoluteUrl = new URL(href, baseUrl).href;
-				if (!(absoluteUrl in checkUrl)) {
-					urls.push(absoluteUrl);
-					checkUrl[absoluteUrl] = 1;
-				}
-			}
-		});
+	//Function to call Backup function
+	function callBackup() {
+		fhd.setBackup(
+			id,
+			sessionId,
+			index,
+			currentCrawlCount,
+			currentCrawlNumber,
+			crawlLimit,
+			nextCrawlCount,
+			currentDirectory,
+			urlList,
+			checkUrl
+		);
+	}
 
-		return urls;
+	//function to update UrlList and list
+	function updateUrlList(list) {
+		if (list != null) {
+			// Remove duplicates
+			list = list.filter((item) => !(item in checkUrl));
+			list.forEach((item) => (checkUrl[item] = 1));
+			nextCrawlCount += list.length;
+			console.log(list.length, "links found");
+			console.log(currentCrawlNumber, " :Crawl Number");
+			console.log(currentCrawlCount, " :currentCrawlCount");
+			urlList.push(...list);
+		}
+	}
+
+	function nextCrawl() {
+		currentCrawlNumber++;
+		currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
+		id = 0;
+		currentCrawlCount = nextCrawlCount;
+		nextCrawlCount = 0;
+	}
+
+	function endSession() {
+		fetch(`http://127.0.0.1:8000/stop_session?sid=${sessionId}`)
+			.then((data) => data.json())
+			.then((obj) => {
+				console.log(obj);
+				process.exit(0);
+			});
 	}
 } catch (error) {
 	console.error("An error occurred:", error);
