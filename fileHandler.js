@@ -35,9 +35,14 @@ function setBackup(
 		urlList: urlList,
 		checkUrl: checkUrl,
 	};
-	fs.writeFileSync(
+	fs.writeFile(
 		`./crawledSessions/${sessionId}/backup.txt`,
-		JSON.stringify(data)
+		JSON.stringify(data),
+		function (err) {
+			if (err) {
+				console.log(err);
+			}
+		}
 	);
 }
 

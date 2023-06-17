@@ -51,22 +51,9 @@ try {
 
 	async function main() {
 		while (index < urlList.length && currentCrawlNumber <= crawlLimit) {
-			//next crawl
-			if (id == currentCrawlCount) {
-				await wait();
-				if (id == currentCrawlCount) nextCrawl();
-			}
-
-			//End of the session
-			if (currentCrawlNumber > crawlLimit) {
-				console.log("Crawl Limit Reached");
-				break;
-			}
-			//Updating currentUrl and index
 			const currentUrl = urlList[index];
 			id++;
 			index++;
-
 			try {
 				//Setting directory and file path
 				fhd.setDirectory(currentDirectory);
@@ -75,24 +62,26 @@ try {
 				const filePath = `${currentDirectory}/${id}.html`;
 
 				// Getting data from the given URL
-				getHtml
-					.getDataFromUrl(currentUrl, filePath)
-					.then(() => {
-						getUrls.findUrlsInBody(filePath, currentUrl).then((data) => {
-							list = data;
-							// Update variables
-							updateUrlList(list);
-							// Backup
-							callBackup();
-						});
-					})
-					.catch((err) => {
-						console.log(err);
-					});
+				await getHtml.getDataFromUrl(currentUrl, filePath);
 
-				//checking if the UrlList is empty
-				if (urlList.length == index) {
-					await wait();
+				// Finding URLs from the given file
+				let list = await getUrls.findUrlsInBody(filePath, currentUrl);
+				// console.log(list);
+
+				// Update variables
+				updateUrlList(list);
+
+				//next crawl
+				if (id === currentCrawlCount) nextCrawl();
+
+				// Backup
+				callBackup();
+
+				//End of the session
+				if (currentCrawlNumber > crawlLimit) {
+					console.log("Crawl Limit Reached");
+					endSession();
+					break;
 				}
 			} catch (error) {
 				console.error("An error occurred:", error);

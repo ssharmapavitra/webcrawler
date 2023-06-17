@@ -18,6 +18,7 @@ function wait(startTime) {
 	return new Promise((resolve) => {
 		setTimeout(() => {
 			linkCount = 0;
+			console.log("Wait Over");
 			resolve();
 		}, 3000);
 	});
@@ -25,7 +26,7 @@ function wait(startTime) {
 
 //Function to get data from URL
 async function getDataFromUrl(url, path) {
-	if (linkCount == 1) await wait(startTime);
+	if (linkCount > limit) await wait(startTime);
 	return new Promise((resolve, reject) => {
 		const writableStream = fs.createWriteStream(path);
 		const httpClient = url.startsWith("https") ? https : http;
