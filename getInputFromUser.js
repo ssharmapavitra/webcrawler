@@ -28,10 +28,14 @@ function getBaseUrl() {
 }
 
 function getFetchLimit() {
-	const limit = readline.question("Enter Fetch Limit: ");
+	const limit = readline.question("Enter Fetch Limit Per Minute: ");
 	return limit;
 }
 
+function getDomainLimit() {
+	const dlimit = readline.question("Enter Domain Limit: ");
+	return dlimit;
+}
 // //Test
 // console.log(getChoice());
 // console.log(getSessionNumber());
@@ -45,4 +49,5 @@ module.exports = {
 	getCrawlLimit,
 	getBaseUrl,
 	getFetchLimit,
+	getDomainLimit,
 };

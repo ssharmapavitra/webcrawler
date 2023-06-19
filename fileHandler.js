@@ -1,3 +1,4 @@
+const { log } = require("console");
 const fs = require("fs");
 
 function getSessionData(path, sessionId) {
@@ -15,34 +16,40 @@ function setBackup(
 	id,
 	sessionId,
 	index,
-	currentCrawlCount,
 	currentCrawlNumber,
 	crawlLimit,
-	nextCrawlCount,
+	fetchLimit,
+	domainLimit,
 	currentDirectory,
-	urlList,
+	currentQueue,
+	nextQueue,
 	checkUrl
 ) {
 	let data = {
 		id: id,
 		sessionId: sessionId,
 		index: index,
-		currentCrawlCount: currentCrawlCount,
 		currentCrawlNumber: currentCrawlNumber,
 		crawlLimit: crawlLimit,
-		nextCrawlCount: nextCrawlCount,
+		fetchLimit: fetchLimit,
+		domainLimit: domainLimit,
 		currentDirectory: currentDirectory,
-		urlList: urlList,
+		currentQueue: currentQueue,
+		nextQueue: nextQueue,
 		checkUrl: checkUrl,
 	};
-	fs.writeFile(
+	// fs.writeFile(
+	// 	`./crawledSessions/${sessionId}/backup.txt`,
+	// 	JSON.stringify(data),
+	// 	function (err) {
+	// 		if (err) {
+	// 			console.log(err);
+	// 		}
+	// 	}
+	// );
+	fs.writeFileSync(
 		`./crawledSessions/${sessionId}/backup.txt`,
-		JSON.stringify(data),
-		function (err) {
-			if (err) {
-				console.log(err);
-			}
-		}
+		JSON.stringify(data)
 	);
 }
 
