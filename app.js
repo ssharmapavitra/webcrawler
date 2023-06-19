@@ -3,19 +3,18 @@ const getUrls = require("./findUrlsInBody");
 const cmd = require("./getInputFromUser");
 const fhd = require("./fileHandler");
 
-//Variables
+// Variables
 let id = 0;
 let index = 0;
-let currentCrawlCount = 1;
 let currentCrawlNumber = 0;
 let crawlLimit = 3;
-let nextCrawlCount = 0;
 let sessionId = 1101;
 let currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
-let urlList = [];
-let checkUrl = {};
-let list = [];
-
+let currentQueue = [];
+let nextQueue = [];
+let checkUrl = new Set();
+let fetchLimit;
+let domainLimit;
 try {
 	// Accepting choice from the command line
 	const choice = cmd.getChoice();
@@ -36,6 +35,14 @@ try {
 		// Accepting crawl limit from the command line
 		crawlLimit = cmd.getCrawlLimit();
 
+		// Accepting fetch limit from the command line
+		fetchLimit = cmd.getFetchLimit();
+		getHtml.setFetchLimit(fetchLimit);
+
+		// Accepting domain limit from the command line
+		domainLimit = cmd.getDomainLimit();
+		getHtml.setDomainLimit(domainLimit);
+
 		// Accepting session id from the command line
 		sessionId = cmd.getSessionNumber();
 
@@ -43,104 +50,106 @@ try {
 		currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
 
 		// Variables update
-		urlList = [url];
-		checkUrl[url] = 1;
+		currentQueue = [url];
+		checkUrl.add(url);
 	}
 
 	main();
 
 	async function main() {
-		while (index < urlList.length && currentCrawlNumber <= crawlLimit) {
-			//next crawl
-			if (id == currentCrawlCount) {
-				await wait();
-				if (id == currentCrawlCount) nextCrawl();
-			}
+		while (index < currentQueue.length && currentCrawlNumber <= crawlLimit) {
+			// Get the next 5 URLs
+			console.log("index: ", index);
+			const currentChunk = currentQueue.slice(index, index + fetchLimit); // Get the next 5 URLs
+			const promises = currentChunk.map((currentUrl) => {
+				return crawlUrl(currentUrl);
+			});
 
-			//End of the session
-			if (currentCrawlNumber > crawlLimit) {
-				console.log("Crawl Limit Reached");
-				break;
-			}
-			//Updating currentUrl and index
-			const currentUrl = urlList[index];
-			id++;
-			index++;
+			index += +fetchLimit; // Move the index to the next chunk of URLs
 
-			try {
-				//Setting directory and file path
-				fhd.setDirectory(currentDirectory);
+			// Wait for all promises to resolve (5 parallel requests)
+			await Promise.all(promises);
 
-				//updating file path
-				const filePath = `${currentDirectory}/${id}.html`;
+			// Next crawl
+			if (id == currentQueue.length) nextCrawl();
 
-				// Getting data from the given URL
-				getHtml
-					.getDataFromUrl(currentUrl, filePath)
-					.then(() => {
-						getUrls.findUrlsInBody(filePath, currentUrl).then((data) => {
-							list = data;
-							// Update variables
-							updateUrlList(list);
-							// Backup
-							callBackup();
-						});
-					})
-					.catch((err) => {
-						console.log(err);
-					});
+			// Backup
+			callBackup();
 
-				//checking if the UrlList is empty
-				if (urlList.length == index) {
-					await wait();
-				}
-			} catch (error) {
-				console.error("An error occurred:", error);
-			}
+			console.log(1);
+		}
+
+		// End of the session
+		if (currentCrawlNumber > crawlLimit) {
+			console.log("Crawl Limit Reached");
 		}
 	}
 
-	//Function to update variables
+	async function crawlUrl(currentUrl) {
+		id++;
+		try {
+			// Setting directory and file path
+			fhd.setDirectory(currentDirectory);
+
+			// Updating file path
+			const filePath = `${currentDirectory}/${id}.html`;
+
+			// Getting data from the given URL
+			await getHtml.getDataFromUrl(currentUrl, filePath);
+
+			// Finding URLs from the given file
+			let list = await getUrls.findUrlsInBody(filePath, currentUrl);
+
+			// Update variables
+			updateUrlList(list);
+		} catch (error) {
+			console.error("An error occurred:", error);
+		}
+	}
+
+	// Function to update variables
 	function updateVariablesFromBackup(jsonData) {
 		id = jsonData.id;
 		sessionId = jsonData.sessionId;
 		index = jsonData.index;
-		currentCrawlCount = jsonData.currentCrawlCount;
 		currentCrawlNumber = jsonData.currentCrawlNumber;
 		crawlLimit = jsonData.crawlLimit;
-		nextCrawlCount = jsonData.nextCrawlCount;
+		fetchLimit = jsonData.fetchLimit;
+		domainLimit = jsonData.domainLimit;
 		currentDirectory = jsonData.currentDirectory;
-		urlList = jsonData.urlList;
-		checkUrl = jsonData.checkUrl;
+		currentQueue = jsonData.currentQueue;
+		nextQueue = jsonData.nextQueue;
+		checkUrl = new Set(jsonData.checkUrl);
 	}
 
-	//Function to call Backup function
+	// Function to call Backup function
 	function callBackup() {
+		console.log("Calling Backup");
 		fhd.setBackup(
 			id,
 			sessionId,
 			index,
-			currentCrawlCount,
 			currentCrawlNumber,
 			crawlLimit,
-			nextCrawlCount,
+			fetchLimit,
+			domainLimit,
 			currentDirectory,
-			urlList,
-			checkUrl
+			currentQueue,
+			nextQueue,
+			Array.from(checkUrl)
 		);
 	}
 
-	//function to update UrlList and list
+	// Function to update UrlList and list
 	function updateUrlList(list) {
 		if (list != null) {
 			// Remove duplicates
-			list = list.filter((item) => !(item in checkUrl));
-			list.forEach((item) => (checkUrl[item] = 1));
-			nextCrawlCount += list.length;
+			list = list.filter((item) => !checkUrl.has(item));
+			list.forEach((item) => checkUrl.add(item));
 			console.log(list.length, "links found");
 			console.log(currentCrawlNumber, " :Crawl Number");
-			console.log(currentCrawlCount, " :currentCrawlCount");
-			urlList.push(...list);
+			console.log(currentQueue.length, " :currentCrawlCount");
+			nextQueue.push(...list);
 		}
 	}
 
@@ -149,17 +158,9 @@ try {
 		currentCrawlNumber++;
 		currentDirectory = `./crawledSessions/${sessionId}/${currentCrawlNumber}`;
 		id = 0;
-		currentCrawlCount = nextCrawlCount;
-		nextCrawlCount = 0;
-	}
-
-	async function wait() {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				console.log("Waiting for 5 seconds");
-				resolve();
-			}, 2000);
-		});
+		currentQueue = nextQueue;
+		nextQueue = [];
+		index = 0;
 	}
 } catch (error) {
 	console.error("An error occurred:", error);
