@@ -1,6 +1,6 @@
 const fs = require("fs");
 //Pattern to Identify an Anchor tag in html file
-const urlPattern = /<a\s+(?:[^>]*?\s+)?href=(["'])(.*?)\1/g;
+const urlPattern = /<a\s+(?:[^>]*?\s+)?href=(["'`])(.*?)\1/g;
 
 //Finding URLs in the body of the html file
 function findUrlsInBody(path, baseUrl) {
