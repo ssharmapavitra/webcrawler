@@ -1,4 +1,5 @@
 const fs = require("fs");
+const fk = require("indexer");
 //Pattern to Identify an Anchor tag in html file
 const urlPattern = /<a\s+(?:[^>]*?\s+)?href=(["'`])(.*?)\1/g;
 
@@ -8,6 +9,9 @@ function findUrlsInBody(path, baseUrl) {
 		const list = new Set();
 		const readFileStream = fs.createReadStream(path);
 		readFileStream.on("data", (chunk) => {
+			//Finding Keywords
+			fk.setIndex(chunk, baseUrl);
+
 			//Identify all the urls in the chunk
 			let unfilteredUrl = urlPattern.exec(chunk.toString());
 			while (unfilteredUrl) {
