@@ -1,6 +1,9 @@
 #CrawledFile
 crawledSessions
 logData
+*.html
+*.txt
+
 
 # Logs
 logs
