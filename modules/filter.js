@@ -1,13 +1,5 @@
-const fs = require("fs");
 const natural = require("natural");
 const stopwords = require("stopwords").english;
-const dbh = require("./databasehandler");
-
-//Setting index
-function setIndex(chunk, url) {
-	let keyWords = getKeywords(chunk);
-	dbh.writeToDb(keyWords, url);
-}
 
 //Finding Keywords
 function getKeywords(chunk) {
@@ -100,13 +92,4 @@ function removeStopWords(words) {
 	return words.filter((word) => !stopwords.includes(word.toLowerCase()));
 }
 
-function writeToDb(words, url) {
-	//write to database
-	console.log(words);
-}
-
-module.exports = { setIndex };
-
-//Test
-var chunk = fs.readFileSync("./1.html");
-getKeywords(chunk);
+module.exports = { getKeywords };

@@ -121,8 +121,6 @@ function checkUrls(href) {
 	return true;
 }
 
-function findUrlsInChunk() {}
-
 module.exports = { findUrlsInBody };
 
 //
