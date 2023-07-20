@@ -23,36 +23,12 @@ function getKeywords(chunk) {
 	// fs.writeFileSync("./test.txt", stemmedWords.join("\n"));
 }
 
+//Finding in Meta Tag
+function getMetaKeywords(chunk) {}
+
 function removeTags(chunk) {
 	chunk = chunk
 		.toString()
-		//remove unnecessary tags
-		.replace(/<html[\s\S]*?>/gi, "")
-		.replace(/<script[\s\S]*?<\/script>/gi, "")
-		.replace(/<style[\s\S]*?<\/style>/gi, "")
-		.replace(/<head[\s\S]*?<\/head>/gi, "")
-		.replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
-		.replace(/<meta[\s\S]*?>/gi, "")
-		.replace(/<link[\s\S]*?>/gi, "")
-		.replace(/<title[\s\S]*?<\/title>/gi, "")
-		.replace(/<[\s\S]*?>/gi, "")
-		.replace(/[\s]+/gi, " ")
-		.replace(/&nbsp;/gi, " ")
-		//replce image and video tags with a space so that the words are not joined together
-		.replace(/<img[\s\S]*?>/gi, " ")
-		.replace(/<video[\s\S]*?<\/video>/gi, " ")
-		.replace(/<audio[\s\S]*?<\/audio>/gi, " ")
-		.replace(/<picture[\s\S]*?<\/picture>/gi, " ")
-		.replace(/<svg[\s\S]*?<\/svg>/gi, " ")
-		.replace(/<canvas[\s\S]*?<\/canvas>/gi, " ")
-		.replace(/<iframe[\s\S]*?<\/iframe>/gi, " ")
-		.replace(/<map[\s\S]*?<\/map>/gi, " ")
-		.replace(/<object[\s\S]*?<\/object>/gi, " ")
-		.replace(/<embed[\s\S]*?<\/embed>/gi, " ")
-		.replace(/<param[\s\S]*?>/gi, " ")
-		.replace(/<source[\s\S]*?>/gi, " ")
-		.replace(/<track[\s\S]*?>/gi, " ")
-		.replace(/<area[\s\S]*?>/gi, " ")
 		//remove all the tags(<> or </>) that are left
 		.replace(/<\/?[\s\S]*?>/gi, "")
 		.replace(/&[\s\S]*?;/gi, "")
@@ -64,7 +40,6 @@ function removeTags(chunk) {
 		.replace(/[\f]+/gi, " ")
 		.replace(/[\b]+/gi, " ")
 		.replace(/[\0]+/gi, " ");
-
 	return chunk;
 }
 
@@ -92,4 +67,32 @@ function removeStopWords(words) {
 	return words.filter((word) => !stopwords.includes(word.toLowerCase()));
 }
 
-module.exports = { getKeywords };
+module.exports = { getKeywords, getMetaKeywords };
+
+// //remove unnecessary tags
+// .replace(/<html[\s\S]*?>/gi, "")
+// .replace(/<script[\s\S]*?<\/script>/gi, "")
+// .replace(/<style[\s\S]*?<\/style>/gi, "")
+// .replace(/<head[\s\S]*?<\/head>/gi, "")
+// .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+// .replace(/<meta[\s\S]*?>/gi, "")
+// .replace(/<link[\s\S]*?>/gi, "")
+// .replace(/<title[\s\S]*?<\/title>/gi, "")
+// .replace(/<[\s\S]*?>/gi, "")
+// .replace(/[\s]+/gi, " ")
+// .replace(/&nbsp;/gi, " ")
+// //replce image and video tags with a space so that the words are not joined together
+// .replace(/<img[\s\S]*?>/gi, " ")
+// .replace(/<video[\s\S]*?<\/video>/gi, " ")
+// .replace(/<audio[\s\S]*?<\/audio>/gi, " ")
+// .replace(/<picture[\s\S]*?<\/picture>/gi, " ")
+// .replace(/<svg[\s\S]*?<\/svg>/gi, " ")
+// .replace(/<canvas[\s\S]*?<\/canvas>/gi, " ")
+// .replace(/<iframe[\s\S]*?<\/iframe>/gi, " ")
+// .replace(/<map[\s\S]*?<\/map>/gi, " ")
+// .replace(/<object[\s\S]*?<\/object>/gi, " ")
+// .replace(/<embed[\s\S]*?<\/embed>/gi, " ")
+// .replace(/<param[\s\S]*?>/gi, " ")
+// .replace(/<source[\s\S]*?>/gi, " ")
+// .replace(/<track[\s\S]*?>/gi, " ")
+// .replace(/<area[\s\S]*?>/gi, " ")

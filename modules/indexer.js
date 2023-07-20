@@ -2,17 +2,15 @@ const fs = require("fs");
 // const dbh = require("./databaseHandler");
 const filter = require("./filter");
 
-// const dbh = require("./databasehandler");
-
 //Setting index
 function setIndex(chunk, url) {
 	//segregate keywords into title, description and body
 	let title = getTitle(chunk);
 	let meta = getMeta(chunk);
-	let body = getBody(chunk);
-	let alter = getAlter(chunk);
+	// let body = getBody(chunk);
+	// let alter = getAlter(chunk);
 
-	console.log("This is Title : \n\n", title);
+	console.log("This is Title : \n\n", meta);
 
 	// let keyWords = getKeywords(chunk);
 	// dbh.writeToDb(keyWords, url, score);
@@ -32,9 +30,7 @@ function getTitle(chunk) {
 function getMeta(chunk) {
 	//finding text inside meta tag
 	let meta = chunk.match(/<meta[\s\S]*?>/gi);
-
-	let metaText = filter.getKeywords(meta);
-
+	let metaText = filter.getMetaKeywords(meta);
 	return metaText;
 }
 
@@ -56,5 +52,8 @@ function writeToDb(words, url) {
 // module.exports = { setIndex };
 
 // //Test
-var chunk = fs.readFileSync("./../1.html");
+let chunk = fs.readFileSync("./../1.html");
+chunk = chunk.toString();
+console.log(typeof chunk);
+// fs.writeFileSync("./../test.txt", chunk);
 setIndex(chunk, "https://www.google.com");
