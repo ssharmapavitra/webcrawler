@@ -1,0 +1,38 @@
+CLASS "WebCrawler" as WebCrawler:
+"frontier: Queue<string>"
+"visited: unordered_set<string>"
+"maxDepth: int"
++ "WebCrawler(maxDepth: int)"
++ "void startCrawling(seedUrl: string)"
++ "void crawl(url: string, depth: int)"
++ "bool shouldVisit(url: string)"
++ "void processPage(url: string, pageContent: string)"
+
+CLASS "RateLimitedCrawler" as RateLimitedCrawler:
+"domain: string"
+"lastRequestTime: time_t"
+"requestInterval: int (seconds)"
++ "RateLimitedCrawler(domain: string, interval: int)"
++ "bool shouldVisit(url: string)"
++ "void makeRequest(url: string)"
+
+CLASS "LinkExtractor" as LinkExtractor:
+"namePath: string"
++ "static std::vector<std::string> extractLinks(pageContent: string)"
+
+CLASS "PageSaver" as PageSaver:
+"baseDir: string"
++ "PageSaver(baseDir: string)"
++ "void savePage(url: string, pageContent: string)"
+
+CLASS "PageReader" as PageReader:
+"baseDir: string"
++ "PageReader(baseDir: string)"
++ "std::optional<std::string> readPage(url: string)"
+
+# Class relations
+
+WebCrawler - RateLimitedCrawler
+WebCrawler - LinkExtractor
+WebCrawler - PageSaver
+WebCrawler - PageReader

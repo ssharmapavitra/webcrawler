@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "natural": "^6.5.0",
-    "readline-sync": "^1.4.10",
-    "stopwords": "^0.0.9"
-  }
-}
