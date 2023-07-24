@@ -1,19 +1,15 @@
+#include "Crawler/HttpDownloader.cpp"
+#include "hyperlinkextractor/FileReader.cpp"
+#include "hyperlinkextractor/HyperlinkExtractor.cpp"
 #include <iostream>
-#include <cstdlib> // For the system function
-#include <string>
-
-using namespace std;
-
-// Include the contents of HttpDownloader.cpp here
-#include "crawler/HttpDownloader.cpp"
 
 int main()
 {
     // URL to fetch
-    string url = "https://example.com";
+    std::string url = "https://codequotient.com/";
 
     // File name to save the response
-    string file_name = "response.html";
+    std::string file_name = "data/crawledPages/response.html";
 
     // Create an instance of HttpDownloader
     HttpDownloader downloader(url, file_name);
@@ -21,11 +17,30 @@ int main()
     // Perform the HTTP request and download the file
     if (downloader.download())
     {
-        cout << "HTTP request executed successfully." << endl;
+        std::cout << "HTTP request executed successfully." << std::endl;
     }
     else
     {
-        cerr << "HTTP request execution failed." << endl;
+        std::cerr << "HTTP request execution failed." << std::endl;
+    }
+
+    // Create a FileReader instance to read the file
+    FileReader fileReader(file_name);
+
+    // Read the contents of the file
+    std::string content = fileReader.readFileContents();
+
+    // Create a HyperlinkExtractor instance to extract hyperlinks
+    HyperlinkExtractor hyperlinkExtractor(content);
+
+    // Extract hyperlinks
+    std::vector<std::string> hyperlinks = hyperlinkExtractor.extractHyperlinks();
+
+    // Display the extracted hyperlinks using streams
+    std::cout << "Extracted Hyperlinks:" << std::endl;
+    for (const auto &hyperlink : hyperlinks)
+    {
+        std::cout << hyperlink << std::endl;
     }
 
     return 0;

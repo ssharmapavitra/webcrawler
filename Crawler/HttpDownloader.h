@@ -3,17 +3,18 @@
 
 #include <string>
 
-using namespace std; // Using namespace std in the header for simplicity (not recommended in larger projects)
-
 class HttpDownloader
 {
 public:
-    HttpDownloader(const string &url, const string &fileName);
+    // Constructor: Initializes the HttpDownloader with the given URL and file name.
+    HttpDownloader(const std::string& url, const std::string& fileName);
+
+    // Performs the HTTP download and returns true if successful, false otherwise.
     bool download();
 
 private:
-    string url_;
-    string fileName_;
+    std::string url_;       // The URL to fetch
+    std::string fileName_;  // The file name to save the response
 };
 
 #endif // HTTP_DOWNLOADER_H
