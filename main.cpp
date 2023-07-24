@@ -88,6 +88,3 @@ int main()
 
     return 0;
 }
-
-    std::string command = "mkdir -p " + file_path;
-    system(command.c_str());
