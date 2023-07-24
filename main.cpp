@@ -31,13 +31,13 @@ int main()
     std::string content = fileReader.readFileContents();
 
     // Create a HyperlinkExtractor instance to extract hyperlinks
-    HyperlinkExtractor hyperlinkExtractor(content);
+    HyperlinkExtractor hyperlinkExtractor(content, url);
 
     // Extract hyperlinks
     std::vector<std::string> hyperlinks = hyperlinkExtractor.extractHyperlinks();
 
     // Display the extracted hyperlinks using streams
-    std::cout << "Extracted Hyperlinks:" << std::endl;
+    std::cout << "Extracted Hyperlinks: " << hyperlinks.size() << std::endl;
     for (const auto &hyperlink : hyperlinks)
     {
         std::cout << hyperlink << std::endl;
