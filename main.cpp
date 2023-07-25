@@ -79,10 +79,15 @@ int main()
         }
 
         // Create a FileReader instance to read the file
-        FileReader fileReader(file_path + std::to_string(link_pointer) + ".html");
+        FileReader fileReader(file_path_string + link_pointer_string + ".html");
 
         // Read the contents of the file
-        std::string content = fileReader.readFileContents();
+        CustomString content_string = fileReader.readFileContents();
+
+        /***************************/
+        // Convert the content to std::string
+        std::string content = content_string.toString();
+        /****************************/
 
         // Create a HyperlinkExtractor instance to extract hyperlinks
         HyperlinkExtractor hyperlinkExtractor(content, current_link);
