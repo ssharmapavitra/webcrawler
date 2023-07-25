@@ -1,24 +1,26 @@
 #include "FileReader.h"
 #include <fstream>
 
-FileReader::FileReader(const std::string &fileName)
+FileReader::FileReader(const CustomString &fileName)
     : fileName_(fileName)
 {
 }
 
-std::string FileReader::readFileContents()
+CustomString FileReader::readFileContents()
 {
-    std::string content;
-    std::ifstream file(fileName_);
+    CustomString content;
+    std::ifstream file(fileName_.c_str()); // Convert CustomString to const char* for file operations
 
     if (file)
     {
         file.seekg(0, std::ios::end);
-        content.reserve(file.tellg());
+        size_t fileSize = static_cast<size_t>(file.tellg());
         file.seekg(0, std::ios::beg);
 
-        content.assign((std::istreambuf_iterator<char>(file)),
-                       std::istreambuf_iterator<char>());
+        char *buffer = new char[fileSize];
+        file.read(buffer, fileSize);
+        content = CustomString(buffer, fileSize); // Create CustomString from char buffer
+        delete[] buffer;
     }
 
     return content;
