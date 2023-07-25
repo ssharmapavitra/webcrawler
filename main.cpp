@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 #include "Crawler/HttpDownloader.cpp"
-#include "hyperlinkextractor/FileReader.cpp"
+#include "FileHandler/FileReader.cpp"
 #include "hyperlinkextractor/HyperlinkExtractor.cpp"
 #include <filesystem>
 
