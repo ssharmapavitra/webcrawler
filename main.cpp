@@ -2,6 +2,7 @@
 #include "Crawler/HttpDownloader.cpp"
 #include "FileHandler/FileReader.cpp"
 #include "hyperlinkextractor/HyperlinkExtractor.cpp"
+#include "dataStructure/String/CustomString.cpp"
 #include <filesystem>
 
 int main()
@@ -17,6 +18,22 @@ int main()
 
     // URL to fetch
     std::string url = "https://codequotient.com/";
+
+    //***************************************
+
+    // Convert the url to CustomString
+    CustomString url_string = CustomString::fromString(url);
+
+    // Print the url
+    std::cout << "URL: " << url_string.toString() << std::endl;
+
+    // Convert the CustomString to std::string
+    std::string url_string_std = url_string.toString();
+
+    // Print the std::string
+    std::cout << "URL: " << url_string_std << std::endl;
+
+    /**************************************************/
 
     // append the url to the queue
     current_queue.push(url);
@@ -35,8 +52,21 @@ int main()
         std::string current_link = current_queue.front();
         current_queue.pop();
 
+        /*************************************************/
+
+        // convert the current link to CustomString
+        CustomString current_link_string = CustomString::fromString(current_link);
+
+        // convert file path to CustomString
+        CustomString file_path_string = CustomString::fromString(file_path);
+
+        // convert link pointer to CustomString
+        CustomString link_pointer_string = CustomString::fromString(std::to_string(link_pointer));
+
+        /**************************************************************/
+
         // Create an instance of HttpDownloader
-        HttpDownloader downloader(current_link, file_path + std::to_string(link_pointer) + ".html");
+        HttpDownloader downloader(current_link_string, file_path_string + link_pointer_string + ".html");
 
         // Perform the HTTP request and download the file
         if (downloader.download())
@@ -71,6 +101,17 @@ int main()
             }
         }
 
+        // print the number of links in the queue
+        std::cout << "Number of links in the queue: " << next_queue.size() << std::endl;
+
+        // print hyperlinks
+        std::cout << "Hyperlinks: " << std::endl;
+        for (const auto hyperlink : hyperlinks)
+        {
+            std::cout << hyperlink << std::endl;
+        }
+        std::cout << std::endl;
+
         // if the current queue is empty, then change the queue
         if (current_queue.empty())
         {
@@ -85,6 +126,5 @@ int main()
             link_pointer++;
         }
     }
-
     return 0;
 }
