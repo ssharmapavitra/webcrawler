@@ -1,19 +1,18 @@
 #ifndef HYPERLINK_EXTRACTOR_H
 #define HYPERLINK_EXTRACTOR_H
 
-#include <string>
-#include <vector>
+#include "dataStructure/String/CustomString.h"
 
 class HyperlinkExtractor
 {
 public:
-    explicit HyperlinkExtractor(const std::string& content, const std::string& baseUrl);
-    std::vector<std::string> extractHyperlinks();
+    explicit HyperlinkExtractor(const CustomString &content, const CustomString &baseUrl);
+    std::vector<CustomString> extractHyperlinks();
 
 private:
-    std::string content_;
-    std::string baseUrl_;
-    std::string makeAbsoluteUrl(const std::string& url);
+    CustomString content_;
+    CustomString baseUrl_;
+    CustomString makeAbsoluteUrl(const CustomString &url);
 };
 
 #endif // HYPERLINK_EXTRACTOR_H

@@ -1,56 +1,52 @@
 #include "HyperlinkExtractor.h"
-#include <regex>
 
-HyperlinkExtractor::HyperlinkExtractor(const std::string &content, const std::string &baseUrl)
+HyperlinkExtractor::HyperlinkExtractor(const CustomString &content, const CustomString &baseUrl)
     : content_(content), baseUrl_(baseUrl)
 {
-    // remove / from the end of the url
-    if (baseUrl_.back() == '/')
+    // remove '/' from the end of the baseUrl
+    if (!baseUrl_.isEmpty() && baseUrl_.charAt(baseUrl_.size() - 1) == '/')
     {
-        baseUrl_.pop_back();
+        baseUrl_.removeLastChar();
     }
 }
 
-std::vector<std::string> HyperlinkExtractor::extractHyperlinks()
+std::vector<CustomString> HyperlinkExtractor::extractHyperlinks()
 {
-    // std::cout << "Check" << std::endl;
-    std::vector<std::string> hyperlinks;
-    std::regex linkRegex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"");
-    std::smatch match;
+    std::vector<CustomString> hyperlinks;
+    CustomString linkRegex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"");
+    CustomString::RegexMatch match;
 
-    auto it = content_.cbegin();
-    auto end = content_.cend();
+    auto it = content_.begin();
+    auto end = content_.end();
 
-    while (std::regex_search(it, end, match, linkRegex))
+    while (content_.regexSearch(it, end, linkRegex, match))
     {
-        std::string url = match[1];
-        std::string absoluteUrl = makeAbsoluteUrl(url);
-        if (!absoluteUrl.empty())
+        CustomString url = match[1];
+        CustomString absoluteUrl = makeAbsoluteUrl(url);
+        if (!absoluteUrl.isEmpty())
         {
             hyperlinks.push_back(absoluteUrl);
-            it = match.suffix().first;
+            it = match.getSuffix().first;
         }
         else
         {
-            it = match[0].second;
+            it = match[0].getSecond();
         }
     }
 
     return hyperlinks;
 }
 
-std::string HyperlinkExtractor::makeAbsoluteUrl(const std::string &url)
+CustomString HyperlinkExtractor::makeAbsoluteUrl(const CustomString &url)
 {
-
-    // std::cout << "url: " << url << std::endl;
-    // ignore #Urls and url of size 1 and 0
-    if (url.find("#") != std::string::npos || url.size() <= 1)
+    // ignore #Urls and urls of size 1 and 0
+    if (url.find(CustomString("#")) != CustomString::npos || url.size() <= 1)
     {
-        return "";
+        return CustomString();
     }
 
     // Check if the URL is relative
-    if (url.empty() || url.find("://") != std::string::npos)
+    if (url.isEmpty() || url.find(CustomString("://")) != CustomString::npos)
     {
         return url; // Already an absolute URL or empty
     }
