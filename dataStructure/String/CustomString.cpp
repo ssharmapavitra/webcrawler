@@ -184,3 +184,13 @@ CustomString CustomString::fromString(const std::string &str)
 {
     return CustomString(str.c_str());
 }
+
+// Remove the last character that contains a '/' from the string
+void CustomString::removeLastCharWithSlash()
+{
+    if (data[length - 1] == '/')
+    {
+        data[length - 1] = '\0';
+        length--;
+    }
+}
