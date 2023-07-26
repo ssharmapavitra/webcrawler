@@ -7,9 +7,9 @@ HyperlinkExtractor::HyperlinkExtractor(const CustomString &content, const Custom
     // baseUrl.removeLastCharWithSlash();
 }
 
-std::vector<CustomString> HyperlinkExtractor::extractHyperlinks()
+CustomVector<CustomString> HyperlinkExtractor::extractHyperlinks()
 {
-    std::vector<CustomString> hyperlinks;
+    CustomVector<CustomString> hyperlinks;
     const char *linkRegex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"");
     std::regex regex(linkRegex);
 
