@@ -143,3 +143,13 @@ size_t CustomQueue<T>::getSize() const
 {
     return size;
 }
+
+// Clear the queue
+template <typename T>
+void CustomQueue<T>::clear()
+{
+    while (!empty())
+    {
+        pop();
+    }
+}

@@ -55,6 +55,9 @@ public:
 
     // Get the size of the queue
     size_t getSize() const;
+
+    // Clear the queue
+    void clear();
 };
 
 #endif // CUSTOM_QUEUE_H
