@@ -43,6 +43,9 @@ public:
 
     // From string method
     static CustomString fromString(const std::string &str);
+
+    // Remove last character
+    void removeLastCharWithSlash();
 };
 
 #endif // CUSTOM_STRING_H
