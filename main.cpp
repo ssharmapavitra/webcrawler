@@ -4,6 +4,7 @@
 #include "hyperlinkextractor/HyperlinkExtractor.cpp"
 #include "dataStructure/String/CustomString.cpp"
 #include "dataStructure/Queue/CustomQueue.cpp"
+#include "dataStructure/Vector/CustomVector.cpp"
 #include <filesystem>
 
 int main()
@@ -60,11 +61,12 @@ int main()
         HyperlinkExtractor hyperlinkExtractor(content_string, current_link);
 
         // Extract hyperlinks
-        std::vector<CustomString> hyperlinks = hyperlinkExtractor.extractHyperlinks();
+        CustomVector<CustomString> hyperlinks = hyperlinkExtractor.extractHyperlinks();
 
         // Add the hyperlinks to the queue
-        for (const auto &hyperlink : hyperlinks)
+        for (size_t i = 0; i < hyperlinks.getSize(); ++i)
         {
+            const CustomString &hyperlink = hyperlinks[i];
             // std::cout << hyperlink << std::endl;
             if (visitedLinks.find(hyperlink) == visitedLinks.end())
             {
@@ -80,9 +82,9 @@ int main()
 
         // print hyperlinks
         std::cout << "Hyperlinks: " << std::endl;
-        for (const auto &hyperlink : hyperlinks)
+        for (size_t i = 0; i < hyperlinks.getSize(); ++i)
         {
-            std::cout << hyperlink.toString() << std::endl;
+            std::cout << hyperlinks[i].toString() << std::endl;
         }
         std::cout << std::endl;
 
