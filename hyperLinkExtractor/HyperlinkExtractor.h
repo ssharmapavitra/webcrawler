@@ -2,13 +2,14 @@
 #define HYPERLINK_EXTRACTOR_H
 
 #include "./../dataStructure/String/CustomString.h"
+#include "./../dataStructure/Vector/CustomVector.h"
 #include <vector>
 
 class HyperlinkExtractor
 {
 public:
     explicit HyperlinkExtractor(const CustomString &content, const CustomString &baseUrl);
-    std::vector<CustomString> extractHyperlinks();
+    CustomVector<CustomString> extractHyperlinks();
 
 private:
     CustomString content_;
