@@ -1,37 +1,32 @@
 #include "HyperlinkExtractor.h"
+#include <regex>
 
 HyperlinkExtractor::HyperlinkExtractor(const CustomString &content, const CustomString &baseUrl)
     : content_(content), baseUrl_(baseUrl)
 {
-    // remove '/' from the end of the baseUrl
-    if (!baseUrl_.isEmpty() && baseUrl_.charAt(baseUrl_.size() - 1) == '/')
-    {
-        baseUrl_.removeLastChar();
-    }
+    // baseUrl.removeLastCharWithSlash();
 }
 
 std::vector<CustomString> HyperlinkExtractor::extractHyperlinks()
 {
     std::vector<CustomString> hyperlinks;
-    CustomString linkRegex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"");
-    CustomString::RegexMatch match;
+    const char *linkRegex("<a\\s+(?:[^>]*?\\s+)?href=\"([^\"]*)\"");
+    std::regex regex(linkRegex);
 
-    auto it = content_.begin();
-    auto end = content_.end();
+    const char *it = content_.c_str();
+    const char *end = it + content_.size();
+    std::match_results<const char *> match;
 
-    while (content_.regexSearch(it, end, linkRegex, match))
+    while (std::regex_search(it, end, match, regex))
     {
-        CustomString url = match[1];
+        CustomString url(match[1].first, match[1].second - match[1].first);
         CustomString absoluteUrl = makeAbsoluteUrl(url);
-        if (!absoluteUrl.isEmpty())
+        if (absoluteUrl.size() != 0)
         {
             hyperlinks.push_back(absoluteUrl);
-            it = match.getSuffix().first;
         }
-        else
-        {
-            it = match[0].getSecond();
-        }
+
+        it = match[0].second;
     }
 
     return hyperlinks;
@@ -46,7 +41,7 @@ CustomString HyperlinkExtractor::makeAbsoluteUrl(const CustomString &url)
     }
 
     // Check if the URL is relative
-    if (url.isEmpty() || url.find(CustomString("://")) != CustomString::npos)
+    if (url.size() == 0 || url.find("://") != CustomString::npos)
     {
         return url; // Already an absolute URL or empty
     }

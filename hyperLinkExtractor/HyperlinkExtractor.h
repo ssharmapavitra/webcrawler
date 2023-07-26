@@ -1,7 +1,8 @@
 #ifndef HYPERLINK_EXTRACTOR_H
 #define HYPERLINK_EXTRACTOR_H
 
-#include "dataStructure/String/CustomString.h"
+#include "./../dataStructure/String/CustomString.h"
+#include <vector>
 
 class HyperlinkExtractor
 {
